@@ -7,8 +7,8 @@ public class User {
     public User(String userName, String password) throws InvalidUserNameException, InvalidPasswordException {
 
         //checking validation for both args
-        isValidUser(userName);
-        isValidPassword(password);
+    	ValidateUser(userName);
+    	ValidatePassword(password);
 
         this.userName=userName;
         this.password= password;
@@ -18,20 +18,9 @@ public class User {
     public String getUserName() {
         return userName;
     }
-    
-    //setters must check validity
-    public void setUserName(String userName) throws InvalidUserNameException {
-        isValidUser(userName);
-        this.userName = userName;
-    }
-
-    public void setPassword(String password) throws InvalidPasswordException {
-        isValidPassword(password);
-        this.password = password;
-    }
 
     //function that checks the validity of the username
-    public boolean isValidUser(String userName) throws InvalidUserNameException {
+    public void ValidateUser(String userName) throws InvalidUserNameException {
 
         if (userName.length() > 50) {
             throw new InvalidUserNameException("Username is too long, try something shorter");
@@ -48,12 +37,10 @@ public class User {
 
         if (!userName.matches(combine))
             throw new InvalidUserNameException("Please enter a valid Email as username");
-
-        return true;
     }
 
     //function that checks the validity of the password
-    public boolean isValidPassword(String password) throws InvalidPasswordException {
+    public void ValidatePassword(String password) throws InvalidPasswordException {
 
         if (password.length() < 8) {
             throw new InvalidPasswordException("Your password is too short, add more characters");
@@ -70,7 +57,7 @@ public class User {
         boolean hasNumber = false;
         boolean hasSpecial = false;
 
-        String special = "!@#$%^&*()"; //allowed characters
+        String special = "!@#$%^&*()-=_+"; //allowed characters
 
         for (int i = 0; i < password.length(); i++) {
 
@@ -95,11 +82,10 @@ public class User {
             throw new InvalidPasswordException("Please enter a valid password");
         }
 
-        return true;
     }
 
     @Override
     public String toString() {
-        return userName;
+        return userName + " " + password;
     }
 }
