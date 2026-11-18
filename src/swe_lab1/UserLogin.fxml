@@ -23,13 +23,14 @@
             <Font size="23.0" />
          </font>
       </Label>
-      <Button layoutX="134.0" layoutY="268.0" mnemonicParsing="false" onAction="#LoginAttempt" prefHeight="45.0" prefWidth="215.0" style="-fx-background-color: white; -fx-text-fill: #0B2129; -fx-font-weight: bold; -fx-background-radius: 30; -fx-padding: 10 40 10 40; -fx-font-size: 16px;" text="Log in" />
+      <Button fx:id="loginButton" layoutX="134.0" layoutY="268.0" mnemonicParsing="false" onAction="#LoginAttempt" prefHeight="45.0" prefWidth="215.0" style="-fx-background-color: white; -fx-text-fill: #0B2129; -fx-font-weight: bold; -fx-background-radius: 30; -fx-padding: 10 40 10 40; -fx-font-size: 16px;" text="Log in" />
       <ImageView fitHeight="37.0" fitWidth="38.0" layoutX="223.0" layoutY="94.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@padlock-protecting-a-construction-worker-profile-icon-vector.jpg" />
          </image>
       </ImageView>
-      <Label fx:id="errortext" layoutX="141.0" layoutY="329.0" prefHeight="17.0" prefWidth="200.0" style="-fx-text-fill: red; -fx-font-weight: bold;" />
+      <Label fx:id="errortext" alignment="CENTER" layoutX="50.0" layoutY="329.0" prefHeight="17.0" prefWidth="384.0" style="-fx-text-fill: red; -fx-font-weight: bold;" />
+      <Button fx:id="testButton" layoutX="164.0" layoutY="420.0" mnemonicParsing="false" onAction="#RunTest" prefHeight="30.0" prefWidth="155.0" style="-fx-background-color: #2F4B54; -fx-text-fill: white; -fx-background-radius: 30;" text="Run concurrency test" />
       <Button layoutX="427.0" layoutY="43.0" mnemonicParsing="false" onAction="#Exit" style="-fx-border-color: red; -fx-font-weight: bold; -fx-text-fill: red;" text="X">
          <font>
             <Font size="9.0" />

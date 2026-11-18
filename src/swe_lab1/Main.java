@@ -7,14 +7,27 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main extends Application {
+
+    //things the whole program shares
+    private UserChecker userChecker;
+    private AttemptTracker tracker;
+    //the shared queue - LoginTasks put failed attempts, FailureWorkers take them
+    private final BlockingQueue<FailedAttempt> failureQueue = new LinkedBlockingQueue<>();
+    private final FailureWorker[] workers = new FailureWorker[2];
+    private UserLoginController controller;
+
+    //init() runs BEFORE start(), on a different thread 
+    //so reading the file here doesn't freeze the screen
+    @Override
+    public void init() {
+        userChecker = UserChecker.loadFromFile("users.txt");
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -49,46 +62,51 @@ public class Main extends Application {
         }
         System.out.println("n=" + n + ", t=" + t);
 
-        ArrayList<User> validUsers = new ArrayList<>();
-        //reading our users file
-        try {
-            File file = new File("users.txt");
-            Scanner reader = new Scanner(file);
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine();
-                //taking the valid users
-                if (line.trim().isEmpty()) continue;
-                String[] data = line.trim().split("\\s+",2);
-                try {
-                    User user = new User(data[0], data.length == 2 ? data[1] : "");
-                    validUsers.add(user);
-                } catch (Exception e) {
-                }
-            }
-            reader.close();
-        } catch (FileNotFoundException e) {
-        	//the file is not there
-            System.out.println("users.txt not found!");
+        //shared state + starting the two FailureWorker threads
+        tracker = new AttemptTracker(n, t);
+        for (int i = 0; i < workers.length; i++) {
+            workers[i] = new FailureWorker("FailureWorker-" + (i + 1), failureQueue, tracker);
+            workers[i].start();
         }
+
         try {
         	//loading the login fxml
             FXMLLoader loader = new FXMLLoader(getClass().getResource("UserLogin.fxml"));
             Parent root = loader.load();
-            //transfer the valid users to the controller to deal with em
-            UserLoginController controller = loader.getController();
-            controller.setValidUsers(validUsers);
+            //transfer what the controller needs
+            controller = loader.getController();
+            controller.setServices(userChecker, tracker, failureQueue);
             Scene scene = new Scene(root);
             primaryStage.setTitle("User Login");
             primaryStage.setScene(scene);
             primaryStage.show();
-            //exiting
-            primaryStage.setOnCloseRequest(event -> {
-                Platform.exit();
-                System.exit(0);
-            });
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    //called automatically when the window is closed or Platform.exit() -> stop all our threads
+    @Override
+    public void stop() {
+        if (controller != null) {
+            controller.shutdown();
+        }
+        for (FailureWorker w : workers) {
+            if (w != null) {
+                w.interrupt();
+            }
+        }
+        //wait a little for the workers to finish (max 1 second each)
+        for (FailureWorker w : workers) {
+            try {
+                if (w != null) {
+                    w.join(1000);
+                }
+            } catch (InterruptedException e) {
+                //closing
+            }
+        }
+        System.out.println("All threads stopped - bye");
     }
 
     //function that checks if the string is a valid number
