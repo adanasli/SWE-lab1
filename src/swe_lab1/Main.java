@@ -9,12 +9,26 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List; 
 import java.util.Scanner;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+    	
+        //reading n and t from the program arguments
+        List<String> args = getParameters().getRaw();
+        Integer n = null;
+        Integer t = null;
+        
+        //we need at least 2 arguments, otherwise get(1) will crash
+        if (args.size() >= 2) {
+            n = parsePositive(args.get(0));
+            t = parsePositive(args.get(1));
+        }
+        System.out.println("n=" + n + ", t=" + t);
+
         ArrayList<User> validUsers = new ArrayList<>();
         //reading our users file
         try {
@@ -56,6 +70,26 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
+    
+    //function that checks if the string is a valid number 
+    //returns the number if valid, otherwise returns null
+    private static Integer parsePositive(String s) {
+        try {
+            int num = Integer.parseInt(s.trim()); //remove spaces
+            
+            //n and t must be at least 1
+            if (num < 1) {
+                return null;
+            }
+            return num;
+        }
+        
+        //not a whole number 
+        catch (NumberFormatException e) {
+            return null;
+        }
+    }
+    
     public static void main(String[] args) {
         launch(args);
     }
